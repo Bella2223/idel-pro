@@ -1679,6 +1679,34 @@
       document.getElementById('page-dashboard').style.display = 'block';
       
       console.log('IDEL Pro Application chargée avec succès');
+
+            // Gestion des modals
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'block';
+        }
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // Fermer modal en cliquant sur le bouton X ou en dehors
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+            e.target.style.display = 'none';
+        }
+        if (e.target.classList.contains('close-modal')) {
+            const modal = e.target.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+    });
     </script>
   </body>
 </html>
