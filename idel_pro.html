@@ -471,7 +471,8 @@
                 </a>
                 <a href="#" class="nav-item" data-page="actes">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                    <span>Actes & Nomenclature</span>
+                    <span>1200
+                    </span>
                 </a>
                 <a href="#" class="nav-item" data-page="planning">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -737,7 +738,8 @@
                     </div>
                 </div>
                 <!-- PAGE: TOURNEE -->
-                <div class="page" id="page-tournee">
+                <div 1320
+                    id="page-tournee">
                     <div class="card">
                         <div class="card-header">
                             <div>
@@ -1177,12 +1179,15 @@
                 </div>
             </div>
         </div>
-                <!-- PAGE: ACTES -->
-                <div class="page" id="page-actes">
+                1250
+                ACTES -->
+                <div class="page" 1300
+                    >
                     <div class="card">
                         <div class="card-header">
                             <div>
-                                <div class="card-title">Actes & Nomenclature</div>
+                                <div class="card-title">1250
+                                </div>
                                 <div class="card-subtitle">Recherchez et sélectionnez les actes NGAP</div>
                             </div>
                             <div class="flex" style="gap: 10px;">
@@ -1319,34 +1324,152 @@
           </div>
           <div class="card">
             <div class="card-header">
-              <div class="card-title">Liste des Factures</div>
+                    <div class="card-title">Facturation & Télétransmission</div>
+                </div>
             </div>
             <div class="card-body">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>N° Facture</th>
-                    <th>Date</th>
-                    <th>Montant</th>
-                    <th>Statut</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>FAC001</strong></td>
-                    <td>15/03/2026</td>
-                    <td>450.00€</td>
-                    <td><span class="tag tag-green">Payée</span></td>
-                    <td><button class="btn btn-sm btn-outline">Télécharger</button></td>
-                  </tr>
-                  <tr>
-                    <td><strong>FAC002</strong></td>
-                    <td>10/03/2026</td>
-                    <td>680.50€</td>
-                    <td><span class="tag tag-yellow">En attente</span></td>
-                    <td><button class="btn btn-sm btn-outline">Télécharger</button></td>
-                  </tr>
+                <!-- Actions rapides -->
+                <div style="margin-bottom: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="nouvelleFSE()">
+                        <span style="font-size: 20px; margin-right: 8px;">➕</span> Nouvelle FSE
+                    </button>
+                    <button class="btn btn-sm btn-success" onclick="transmissionLot()">
+                        <span style="font-size: 18px; margin-right: 5px;">📤</span> Transmission par lot
+                    </button>
+                    <button class="btn btn-sm btn-outline" onclick="lectureCarteVitale()">
+                        <span style="font-size: 18px; margin-right: 5px;">💳</span> Lire Carte Vitale
+                    </button>
+                    <button class="btn btn-sm btn-outline" onclick="synchroniserDMP()">
+                        <span style="font-size: 18px; margin-right: 5px;">🔄</span> Synchroniser DMP
+                    </button>
+                </div>
+
+                <!-- Filtres -->
+                <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                    <select style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                        <option>Toutes les factures</option>
+                        <option>En attente</option>
+                        <option>Payées</option>
+                        <option>Rejetées</option>
+                        <option>Transmises</option>
+                    </select>
+                    <input type="date" style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                    <input type="text" placeholder="Rechercher..." style="padding: 8px; border-radius: 4px; border: 1px solid #ddd; flex: 1; min-width: 200px;">
+                </div>
+
+                <!-- Tableau des factures -->
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" onclick="toggleToutesFactures()"></th>
+                            <th>N° FSE</th>
+                            <th>Patient</th>
+                            <th>Date</th>
+                            <th>Actes</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                            <th>Mode</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="checkbox"></td>
+                            <td><strong>FSE001</strong></td>
+                            <td>Dupont Marie</td>
+                            <td>15/03/2026</td>
+                            <td>AMI 3 (×2), AMI 4</td>
+                            <td><strong>450.00€</strong></td>
+                            <td><span class="tag tag-green">Payée</span></td>
+                            <td><span style="font-size: 18px;">💳</span> SESAM</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline" onclick="voirDetailFSE('FSE001')" title="Voir détails">
+                                    👁️
+                                </button>
+                                <button class="btn btn-sm btn-outline" onclick="imprimerFSE('FSE001')" title="Imprimer">
+                                    🖨️
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox"></td>
+                            <td><strong>FSE002</strong></td>
+                            <td>Martin Jean</td>
+                            <td>10/03/2026</td>
+                            <td>AMI 1, AMI 2</td>
+                            <td><strong>680.50€</strong></td>
+                            <td><span class="tag tag-yellow">En attente</span></td>
+                            <td><span style="font-size: 18px;">📄</span> Papier</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="transmettreFacture('FSE002')" title="Transmettre">
+                                    📤
+                                </button>
+                                <button class="btn btn-sm btn-outline" onclick="voirDetailFSE('FSE002')" title="Voir détails">
+                                    👁️
+                                </button>
+                                <button class="btn btn-sm btn-outline" onclick="imprimerFSE('FSE002')" title="Imprimer">
+                                    🖨️
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox"></td>
+                            <td><strong>FSE003</strong></td>
+                            <td>Bernard Sophie</td>
+                            <td>08/03/2026</td>
+                            <td>AMI 3, DI 4</td>
+                            <td><strong>520.00€</strong></td>
+                            <td><span class="tag tag-blue">Transmise</span></td>
+                            <td><span style="font-size: 18px;">💳</span> SESAM</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline" onclick="suiviTransmission('FSE003')" title="Suivi transmission">
+                                    📊
+                                </button>
+                                <button class="btn btn-sm btn-outline" onclick="voirDetailFSE('FSE003')" title="Voir détails">
+                                    👁️
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox"></td>
+                            <td><strong>FSE004</strong></td>
+                            <td>Dubois Pierre</td>
+                            <td>05/03/2026</td>
+                            <td>AMI 1 (×3)</td>
+                            <td><strong>315.00€</strong></td>
+                            <td><span class="tag tag-red">Rejetée</span></td>
+                            <td><span style="font-size: 18px;">💳</span> SESAM</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="corrigerFacture('FSE004')" title="Corriger">
+                                    ✏️
+                                </button>
+                                <button class="btn btn-sm btn-outline" onclick="voirErreurs('FSE004')" title="Voir erreurs">
+                                    ⚠️
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Résumé financier -->
+                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div>
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Total factures</div>
+                        <div style="font-size: 24px; font-weight: bold; color: #2c3e50;">1 965.50€</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Payées</div>
+                        <div style="font-size: 24px; font-weight: bold; color: #27ae60;">450.00€</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">En attente</div>
+                        <div style="font-size: 24px; font-weight: bold; color: #f39c12;">1 200.50€</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Rejetées</div>
+                        <div style="font-size: 24px; font-weight: bold; color: #e74c3c;">315.00€</div>
+                    </div>
+                </div>                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1354,7 +1477,8 @@
         </div>
 
         <!-- PAGE ORDONNANCES -->
-        <div id="page-ordonnances" class="page" style="display: none;">
+        <div id="page-ordonnances" 1320
+            style="display: none;">
           <div class="page-header">
             <h2>Ordonnances</h2>
           </div>
@@ -1391,8 +1515,10 @@
           </div>
         </div>
 
-        <!-- PAGE PARAMÈTRES -->
-        <div id="page-parametres" class="page" style="display: none;">
+        1322
+                PARAMÈTRES -->
+        <div id="page-parametres" 1321
+            style="display: none;">
           <div class="page-header">
             <h2>Paramètres</h2>
           </div>
@@ -1426,7 +1552,8 @@
           </div>
         </div>
       </div>
-    </main>
+    1250
+            
 
     <!-- MODALES -->
     <div id="modal-new-tournee" class="modal">
@@ -1674,4 +1801,58 @@
             badge.textContent = count - 1;
           } else {1000
                   1010
+
+                              // Fonctions de facturation
+            function nouvelleFSE() {
+                alert('Ouverture du formulaire de création de FSE...\n\nFonctionnalité à implémenter avec:\n- Sélection patient\n- Lecture carte Vitale SESAM\n- Saisie actes (AMI, DI, etc.)\n- Calcul automatique montants\n- Modes: Tiers payant / Papier');
+            }
+
+            function transmissionLot() {
+                const factures = document.querySelectorAll('#page-factures input[type="checkbox"]:checked');
+                if (factures.length === 0) {
+                    alert('Aucune facture sélectionnée pour la transmission');
+                    return;
+                }
+                alert(`Transmission de ${factures.length - 1} facture(s) vers la CPAM...\n\nEn cours de développement:\n- Connexion sécurisée SESAM-Vitale\n- Validation des FSE\n- Envoi par lot\n- Suivi des retours`);
+            }
+
+            function lectureCarteVitale() {
+                alert('Lecture de la carte Vitale...\n\nFonctionnalité SESAM-Vitale:\n- Connexion lecteur carte\n- Lecture données patient\n- Droits et couverture\n- Organisme complémentaire\n- Tiers payant');
+            }
+
+            function synchroniserDMP() {
+                alert('Synchronisation avec le Dossier Médical Partagé...\n\nFonctionnalités DMP:\n- Consultation antécédents\n- Accès ordonnances\n- Historique soins\n- Ajout documents\n- Mise à jour données');
+            }
+
+            function toggleToutesFactures() {
+                const checkboxes = document.querySelectorAll('#page-factures tbody input[type="checkbox"]');
+                const masterCheckbox = document.querySelector('#page-factures thead input[type="checkbox"]');
+                checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+            }
+
+            function voirDetailFSE(fseId) {
+                alert(`Détails FSE ${fseId}:\n\n- Patient\n- Date et heure\n- Actes réalisés\n- Montants (base, dépassement)\n- Mode paiement\n- Statut transmission\n- Documents joints`);
+            }
+
+            function imprimerFSE(fseId) {
+                alert(`Impression FSE ${fseId}...\n\nOptions d'impression:\n- Feuille de soins\n- Facture patient\n- Récapitulatif\n- Format PDF`);
+            }
+
+            function transmettreFacture(fseId) {
+                alert(`Transmission FSE ${fseId} vers la CPAM...\n\nÉtapes:\n1. Validation données\n2. Connexion SESAM-Vitale\n3. Envoi sécurisé\n4. Accusé réception`);
+            }
+
+            function suiviTransmission(fseId) {
+                alert(`Suivi transmission FSE ${fseId}:\n\n✓ Envoyé: 08/03/2026 14:30\n✓ Reçu CPAM: 08/03/2026 14:32\n⏳ En cours de traitement\n\nDélai estimé: 24-48h`);
+            }
+
+            function corrigerFacture(fseId) {
+                alert(`Correction FSE ${fseId}...\n\nMotif rejet:\n- Données patient incorrectes\n- Acte non pris en charge\n- Période de soins invalide\n\nOuverture formulaire correction...`);
+            }
+
+            function voirErreurs(fseId) {
+                alert(`Erreurs FSE ${fseId}:\n\n⚠️ NIR patient invalide\n⚠️ Date hors période droits\n⚠️ Acte AMI 1 nécessite prescription\n\nConsultez le guide NGAP pour plus d'informations.`);
+            }
+                  
+1810
                   
