@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IDEL Pro — Application Infirmier Libéral</title>
+<style>
+  :root {
+    --primary: #1a7fd4;
+    --primary-dark: #145fa3;
+    --secondary: #27ae60;
+    --danger: #e74c3c;
+    --warning: #f39c12;
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #2c3e50;
+    --muted: #7f8c8d;
+    --border: #dde3ea;
+    --sidebar-bg: #1a2e44;
+    --sidebar-text: #c8d6e5;
+    --sidebar-active: #1a7fd4;
+    --shadow: 0 2px 12px rgba(0,0,0,0.09);
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px; background: var(--sidebar-bg); color: var(--sidebar-text);
+    display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 100;
+    transition: width 0.3s;
+  }
+  .sidebar-logo {
+    padding: 22px 20px 16px; font-size: 1.2rem; font-weight: 700; color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-logo .logo-icon { font-size: 1.6rem; }
+  .sidebar-logo .logo-sub { font-size: 0.72rem; color: var(--sidebar-text); font-weight: 400; display: block; margin-top: 2px; }
+  .nav-section { padding: 14px 12px 4px; font-size: 0.67rem; text-transform: uppercase; letter-spacing: 1px; color: #5a7a9a; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px; padding: 11px 20px; cursor: pointer;
+    border-radius: 8px; margin: 2px 8px; font-size: 0.9rem; color: var(--sidebar-text);
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+  .nav-item.active { background: var(--sidebar-active); color: #fff; font-weight: 600; }
+  .nav-item .icon { font-size: 1.1rem; width: 22px; text-align: center; }
+  .badge { background: var(--danger); color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 0.7rem; margin-left: auto; }
+  .sidebar-footer { margin-top: auto; padding: 16px 20px; font-size: 0.78rem; color: #5a7a9a; border-top: 1px solid rgba(255,255,255,0.08); }
+
+  /* MAIN */
+  .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+  .topbar {
+    background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 28px;
+    display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 50;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  }
+  .topbar-title { font-size: 1.15rem; font-weight: 700; flex: 1; }
+  .topbar-date { font-size: 0.82rem; color: var(--muted); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px;
+    border-radius: 8px; border: none; cursor: pointer; font-size: 0.88rem; font-weight: 600;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-success { background: var(--secondary); color: #fff; }
+  .btn-success:hover { background: #219a52; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+  .btn-outline:hover { background: var(--bg); }
+  .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+
+  /* PAGES */
+  .page { display: none; padding: 28px; animation: fadeIn 0.2s; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* CARDS */
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; margin-bottom: 18px; }
+  .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .card-title .icon { font-size: 1.2rem; }
+
+  /* STATS GRID */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--card); border-radius: var(--radius); padding: 20px 22px;
+    box-shadow: var(--shadow); display: flex; align-items: center; gap: 16px;
+  }
+  .stat-icon { font-size: 2rem; width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .stat-icon.blue { background: #e8f3fc; }
+  .stat-icon.green { background: #e8f8ef; }
+  .stat-icon.orange { background: #fef5e7; }
+  .stat-icon.red { background: #fdecea; }
+  .stat-info .val { font-size: 1.7rem; font-weight: 800; line-height: 1; }
+  .stat-info .lbl { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  .stat-info .trend { font-size: 0.75rem; margin-top: 3px; }
+  .trend-up { color: var(--secondary); }
+  .trend-down { color: var(--danger); }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th { background: var(--bg); padding: 10px 14px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fafc; }
+
+  /* BADGES */
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+  .tag-green { background: #e8f8ef; color: #1e8449; }
+  .tag-blue { background: #e8f3fc; color: #1a6fbc; }
+  .tag-orange { background: #fef5e7; color: #ca7c07; }
+  .tag-red { background: #fdecea; color: #c0392b; }
+  .tag-gray { background: #f0f4f8; color: #636e72; }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .form-group label { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+  .form-control {
+    padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 0.9rem; color: var(--text); background: #fff; transition: border 0.15s;
+  }
+  .form-control:focus { outline: none; border-color: var(--primary); }
+  select.form-control { cursor: pointer; }
+  textarea.form-control { resize: vertical; min-height: 80px; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000;
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: var(--radius); padding: 28px; width: 520px; max-width: 95vw;
+    max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    animation: modalIn 0.2s;
+  }
+  @keyframes modalIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .modal-title { font-size: 1.05rem; font-weight: 700; }
+  .modal-close { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); line-height: 1; padding: 0; }
+
+  /* PLANNING */
+  .planning-grid { display: grid; grid-template-columns: 80px repeat(7, 1fr); gap: 1px; background: var(--border); border-radius: 10px; overflow: hidden; font-size: 0.82rem; }
+  .planning-header { background: var(--primary); color: #fff; padding: 10px 6px; text-align: center; font-weight: 700; font-size: 0.8rem; }
+  .planning-time { background: var(--bg); padding: 8px 10px; text-align: right; color: var(--muted); font-size: 0.75rem; font-weight: 600; }
+  .planning-cell { background: var(--card); padding: 4px; min-height: 54px; position: relative; }
+  .planning-event {
+    background: var(--primary); color: #fff; border-radius: 5px; padding: 4px 6px;
+    font-size: 0.72rem; margin-bottom: 2px; cursor: pointer; line-height: 1.3;
+  }
+  .planning-event.green { background: var(--secondary); }
+  .planning-event.orange { background: var(--warning); }
+
+  /* TOURNEE */
+  .tournee-list { list-style: none; }
+  .tournee-item {
+    display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+    border: 1.5px solid var(--border); border-radius: 10px; margin-bottom: 8px;
+    background: var(--card); transition: border-color 0.15s;
+  }
+  .tournee-item:hover { border-color: var(--primary); }
+  .tournee-item.done { opacity: 0.55; }
+  .tournee-num { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .tournee-num.done-num { background: var(--secondary); }
+  .tournee-info { flex: 1; }
+  .tournee-info .name { font-weight: 700; font-size: 0.92rem; }
+  .tournee-info .detail { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+  .tournee-time { font-size: 0.82rem; font-weight: 600; color: var(--primary); white-space: nowrap; }
+
+  /* PATIENT CARD */
+  .patient-avatar {
+    width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1rem; color: #fff; flex-shrink: 0;
+  }
+
+  /* PROGRESS */
+  .progress-bar { background: var(--border); border-radius: 20px; height: 8px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 20px; transition: width 0.5s; }
+
+  /* TIMELINE */
+  .timeline { list-style: none; position: relative; padding-left: 20px; }
+  .timeline::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; padding: 0 0 16px 20px; }
+  .timeline-item::before {
+    content: ''; position: absolute; left: -14px; top: 4px;
+    width: 12px; height: 12px; border-radius: 50%; background: var(--primary); border: 2px solid #fff;
+    box-shadow: 0 0 0 2px var(--primary);
+  }
+  .timeline-date { font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; }
+  .timeline-text { font-size: 0.85rem; }
+
+  /* FACTURATION */
+  .facture-total { font-size: 1.6rem; font-weight: 800; color: var(--primary); }
+
+  /* ALERT */
+  .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; font-size: 0.87rem; display: flex; align-items: flex-start; gap: 10px; }
+  .alert-warning { background: #fef9e7; border: 1px solid #f6c90b; color: #7d6608; }
+  .alert-info { background: #eaf4fd; border: 1px solid #85c1e9; color: #1a5276; }
+  .alert-success { background: #eafaf1; border: 1px solid #82e0aa; color: #1d6a39; }
+
+  /* SCROLL */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #c5d0dd; border-radius: 10px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { width: 60px; }
+    .sidebar .nav-item span, .sidebar-logo .logo-title, .sidebar-logo .logo-sub, .nav-section, .sidebar-footer { display: none; }
+    .main { margin-left: 60px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+
+  /* VITALE CARD WIDGET */
+  .vitale-card {
+    background: linear-gradient(135deg, #1e6f3e 60%, #27ae60);
+    color: #fff; border-radius: 14px; padding: 18px 22px;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .vitale-card .vc-label { font-size: 0.72rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+  .vitale-card .vc-val { font-size: 1.05rem; font-weight: 700; margin-top: 3px; }
+
+  /* INPUT GROUP */
+  .input-group { display: flex; gap: 0; }
+  .input-group .form-control { border-radius: 8px 0 0 8px; flex: 1; }
+  .input-group .btn { border-radius: 0 8px 8px 0; }
+
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .section-header h2 { font-size: 1.25rem; font-weight: 800; }
+
+  .search-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .search-bar .form-control { max-width: 320px; }
+
+  .acte-chip { display: inline-block; padding: 4px 10px; background: var(--bg); border-radius: 6px; font-size: 0.77rem; font-weight: 600; margin: 2px; border: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">🏥</span>
+    <div>
+      <span class="logo-title" style="font-size:1.1rem;font-weight:800;">IDEL Pro</span>
+      <span class="logo-sub">Infirmier Libéral</span>
+    </div>
+  </div>
+
+  <div class="nav-section">Principal</div>
+  <div class="nav-item active" onclick="navigate('dashboard')">
+    <span class="icon">📊</span><span>Tableau de bord</span>
+  </div>
+  <div class="nav-item" onclick="navigate('planning')">
+    <span class="icon">📅</span><span>Planning</span>
+  </div>
+  <div class="nav-item" onclick="navigate('tournee')">
+    <span class="icon">🗺️</span><span>Tournée du jour</span>
+    <span class="badge">8</span>
+  </div>
+
+  <div class="nav-section">Patients</div>
+  <div class="nav-item" onclick="navigate('patients')">
+    <span class="icon">👥</span><span>Dossiers patients</span>
+  </div>
+  <div class="nav-item" onclick="navigate('soins')">
+    <span class="icon">💉</span><span>Soins & Actes</span>
+  </div>
+  <div class="nav-item" onclick="navigate('transmissions')">
+    <span class="icon">📋</span><span>Transmissions</span>
+    <span class="badge" style="background:var(--warning);color:#fff">3</span>
+  </div>
+
+  <div class="nav-section">Gestion</div>
+  <div class="nav-item" onclick="navigate('facturation')">
+    <span class="icon">💶</span><span>Facturation</span>
+  </div>
+  <div class="nav-item" onclick="navigate('statistiques')">
+    <span class="icon">📈</span><span>Statistiques</span>
+  </div>
+  <div class="nav-item" onclick="navigate('messagerie')">
+    <span class="icon">✉️</span><span>Messagerie MSS</span>
+    <span class="badge">2</span>
+  </div>
+
+  <div class="sidebar-footer">
+    v1.0 — IDEL Pro © 2026<br>Hébergement HDS • RGPD
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="pageTitle">Tableau de bord</div>
+    <div class="topbar-date">📅 Jeudi 26 mars 2026</div>
+    <button class="btn btn-primary btn-sm" onclick="openModal('modalRdv')">+ Nouveau RDV</button>
+    <div style="width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;">ML</div>
+  </div>
+
+  <!-- === DASHBOARD === -->
+  <div class="page active" id="page-dashboard">
+    <div class="alert alert-info">
+      ℹ️ <span>3 transmissions en attente de lecture — 2 factures impayées — Prochain acte : <strong>Mme Dupont à 08h30</strong></span>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">🏠</div>
+        <div class="stat-info"><div class="val">8</div><div class="lbl">Visites aujourd'hui</div><div class="trend trend-up">▲ +1 vs hier</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">💶</div>
+        <div class="stat-info"><div class="val">312€</div><div class="lbl">CA du jour</div><div class="trend trend-up">▲ +12%</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">👥</div>
+        <div class="stat-info"><div class="val">47</div><div class="lbl">Patients actifs</div><div class="trend trend-up">▲ 3 nouveaux</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">⚠️</div>
+        <div class="stat-info"><div class="val">2</div><div class="lbl">Impayés CPAM</div><div class="trend trend-down">À régulariser</div></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><span class="icon">🗺️</span>Tournée du jour — 26 mars</div>
+        <ul class="tournee-list">
+          <li class="tournee-item done">
+            <div class="tournee-num done-num">✓</div>
+            <div class="tournee-info"><div class="name">Mme Martin, 82 ans</div><div class="detail">Pansement complexe • 14 rue des Lilas</div></div>
+            <div class="tournee-time">07h15</div>
+          </li>
+          <li class="tournee-item done">
+            <div class="tournee-num done-num">✓</div>
+            <div class="tournee-info"><div class="name">M. Bernard, 71 ans</div><div class="detail">Injection insuline • 3 av. Gambetta</div></div>
+            <div class="tournee-time">07h50</div>
+          </li>
+          <li class="tournee-item" style="border-color:var(--primary);">
+            <div class="tournee-num">3</div>
+            <div class="tournee-info"><div class="name">Mme Dupont, 68 ans</div><div class="detail">Bilan soins infirmiers (BSI) • 8 rue du Moulin</div></div>
+            <div class="tournee-time">08h30 ⏰</div>
+          </li>
+          <li class="tournee-item">
+            <div class="tournee-num">4</div>
+            <div class="tournee-info"><div class="name">M. Leroy, 55 ans</div><div class="detail">Prise de sang • 22 rue Victor Hugo</div></div>
+            <div class="tournee-time">09h15</div>
+          </li>
+          <li class="tournee-item">
+            <div class="tournee-num">5</div>
+            <div class="tournee-info"><div class="name">Mme Leclerc, 77 ans</div><div class="detail">Soin de stomie • Résidence Les Pins</div></div>
+            <div class="tournee-time">10h00</div>
+          </li>
+        </ul>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="navigate('tournee')">Voir tournée complète →</button>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-title"><span class="icon">💶</span>Facturation du mois</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div><div class="facture-total">5 840 €</div><div style="font-size:0.78rem;color:var(--muted);">Mars 2026 • 23 jours travaillés</div></div>
+            <div style="text-align:right;"><div style="font-size:0.85rem;font-weight:700;color:var(--secondary);">5 220 € perçus</div><div style="font-size:0.78rem;color:var(--muted);">620 € en attente</div></div>
+          </div>
+          <div style="margin-bottom:6px;font-size:0.8rem;font-weight:600;">Avancement mensuel</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:78%;background:var(--primary);"></div></div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">78% de l'objectif mensuel atteint</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="icon">📋</span>Transmissions récentes</div>
+          <div style="font-size:0.87rem;">
+            <div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;">
+              <span style="font-size:1.1rem;">🔴</span>
+              <div><div style="font-weight:600;">M. Bernard — Glycémie élevée</div><div style="font-size:0.77rem;color:var(--muted);">Prévenir Dr. Moreau • Il y a 45 min</div></div>
+            </div>
+            <div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;">
+              <span style="font-size:1.1rem;">🟡</span>
+              <div><div style="font-weight:600;">Mme Martin — Plaie en cours de cicatrisation</div><div style="font-size:0.77rem;color:var(--muted);">Pansement refait • Hier 19h00</div></div>
+            </div>
+            <div style="padding:10px 0;display:flex;gap:10px;align-items:flex-start;">
+              <span style="font-size:1.1rem;">🟢</span>
+              <div><div style="font-weight:600;">Mme Leclerc — Stomie stable</div><div style="font-size:0.77rem;color:var(--muted);">RAS • Hier 11h30</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === PLANNING === -->
+  <div class="page" id="page-planning">
+    <div class="section-header">
+      <h2>📅 Planning de la semaine</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline btn-sm">← Sem. préc.</button>
+        <button class="btn btn-primary btn-sm">Sem. 26 mars</button>
+        <button class="btn btn-outline btn-sm">Sem. suiv. →</button>
+        <button class="btn btn-success btn-sm" onclick="openModal('modalRdv')">+ Ajouter</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="planning-grid">
+        <div class="planning-header" style="background:var(--sidebar-bg);">Heure</div>
+        <div class="planning-header">Lun 23</div>
+        <div class="planning-header">Mar 24</div>
+        <div class="planning-header">Mer 25</div>
+        <div class="planning-header" style="background:#1565c0;">Jeu 26 ★</div>
+        <div class="planning-header">Ven 27</div>
+        <div class="planning-header">Sam 28</div>
+        <div class="planning-header">Dim 29</div>
+
+        <div class="planning-time">07h00</div>
+        <div class="planning-cell"><div class="planning-event">Mme Martin<br>Pansement</div></div>
+        <div class="planning-cell"><div class="planning-event green">M. Petit<br>Injection</div></div>
+        <div class="planning-cell"></div>
+        <div class="planning-cell"><div class="planning-event">Mme Martin<br>Pansement</div></div>
+        <div class="planning-cell"><div class="planning-event">Mme Martin<br>Pansement</div></div>
+        <div class="planning-cell"></div>
+        <div class="planning-cell"></div>
+
+        <div class="planning-time">08h00</div>
+        <div class="planning-cell"><div class="planning-event green">M. Bernard<br>Insuline</div></div>
+        <div class="planning-cell"><div class="planning-event green">M. Bernard<br>Insuline</div></div>
+        <div class="planning-cell"><div class="planning-event green">M. Bernard<br>Insuline</div></div>
+        <div class="planning-cell"><div class="planning-event green">M. Bernard<br>Insuline</div><div class="planning-event orange">Mme Dupont<br>BSI</div></div>
+        <div class="planning-cell"><div class="planning-event green">M. Bernard<br>Insuline</div></div>
+        <div class="planning-cell"><div class="planning-event green">M. Bernard<br>Insuline</div></div>
+        <div class="planning-cell"></div>
+
+        <div class="planning-time">09h00</div>
+        <div class="planning-cell"></div>
+        <div class="planning-cell"><div class="planning-event">M. Leroy<br>Prise sang</div></div>
+        <div class="planning-cell"></div>
+        <div class="planning-cell"><div class="planning-event">M. Leroy<br>Prise sang</div></div>
+        <div class="planning-cell"></div>
+        <div class="planning-cell"><div class="planning-event orange">Mme Thomas<br>Perfusion</div></div>
+        <div class="planning-cell"></div>
+
+        <div class="planning-time">10h00</div>
+        <div class="planning-cell"><div class="planning-event orange">Mme Leclerc<br>Stomie</div></div>
+        <div class="planning-cell"></div>
+        <div class="planning-cell"><div class="planning-event orange">Mme Leclerc<br>Stomie</div></div>
+        <div class="planning-cell"><div class="planning-event orange">Mme Leclerc<br>Stomie</div></div>
+        <div class="planning-cell"><div class="planning-event orange">Mme Leclerc<br>Stomie</div></div>
+        <div class="planning-cell"></div>
+        <div class="planning-cell"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;font-size:0.8rem;margin-top:4px;">
+      <span><span class="planning-event" style="display:inline-block;padding:2px 10px;font-size:0.78rem;">■</span> Pansement / BSI</span>
+      <span><span class="planning-event green" style="display:inline-block;padding:2px 10px;font-size:0.78rem;">■</span> Injection / Insuline</span>
+      <span><span class="planning-event orange" style="display:inline-block;padding:2px 10px;font-size:0.78rem;">■</span> Soins complexes</span>
+    </div>
+  </div>
+
+  <!-- === TOURNÉE === -->
+  <div class="page" id="page-tournee">
+    <div class="section-header">
+      <h2>🗺️ Tournée du jour — 26 mars 2026</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline btn-sm">🗺 Itinéraire GPS</button>
+        <button class="btn btn-primary btn-sm">Optimiser tournée</button>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">📍 Ordre de passage</div>
+        <ul class="tournee-list">
+          <li class="tournee-item done"><div class="tournee-num done-num">✓</div><div class="tournee-info"><div class="name">Mme Martin, 82 ans</div><div class="detail">Pansement complexe (AMI 3.5) • 14 rue des Lilas</div></div><div><div class="tournee-time">07h15</div><span class="tag tag-green" style="font-size:0.7rem;">Fait</span></div></li>
+          <li class="tournee-item done"><div class="tournee-num done-num">✓</div><div class="tournee-info"><div class="name">M. Bernard, 71 ans</div><div class="detail">Injection insuline (AMI 1.0) • 3 av. Gambetta</div></div><div><div class="tournee-time">07h50</div><span class="tag tag-green" style="font-size:0.7rem;">Fait</span></div></li>
+          <li class="tournee-item" style="border-color:var(--primary);background:#f0f7ff;"><div class="tournee-num">3</div><div class="tournee-info"><div class="name">Mme Dupont, 68 ans</div><div class="detail">BSI (AIS 9) • 8 rue du Moulin</div></div><div><div class="tournee-time">08h30</div><span class="tag tag-blue" style="font-size:0.7rem;">En cours</span></div></li>
+          <li class="tournee-item"><div class="tournee-num">4</div><div class="tournee-info"><div class="name">M. Leroy, 55 ans</div><div class="detail">Prise de sang (AMI 1.0) • 22 rue Victor Hugo</div></div><div><div class="tournee-time">09h15</div><span class="tag tag-gray" style="font-size:0.7rem;">À venir</span></div></li>
+          <li class="tournee-item"><div class="tournee-num">5</div><div class="tournee-info"><div class="name">Mme Leclerc, 77 ans</div><div class="detail">Soin de stomie (AMI 5.0) • Résidence Les Pins</div></div><div><div class="tournee-time">10h00</div><span class="tag tag-gray" style="font-size:0.7rem;">À venir</span></div></li>
+          <li class="tournee-item"><div class="tournee-num">6</div><div class="tournee-info"><div class="name">M. Moreau, 88 ans</div><div class="detail">Perfusion (AMI 12.0) • 6 impasse des Roses</div></div><div><div class="tournee-time">11h00</div><span class="tag tag-gray" style="font-size:0.7rem;">À venir</span></div></li>
+          <li class="tournee-item"><div class="tournee-num">7</div><div class="tournee-info"><div class="name">Mme Petit, 64 ans</div><div class="detail">Surveillance (AMI 2.0) • 18 bd Voltaire</div></div><div><div class="tournee-time">12h30</div><span class="tag tag-gray" style="font-size:0.7rem;">À venir</span></div></li>
+          <li class="tournee-item"><div class="tournee-num">8</div><div class="tournee-info"><div class="name">M. Simon, 79 ans</div><div class="detail">Pansement simple (AMI 2.0) • 33 rue Pasteur</div></div><div><div class="tournee-time">13h15</div><span class="tag tag-gray" style="font-size:0.7rem;">À venir</span></div></li>
+        </ul>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title">📊 Résumé tournée</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:0.88rem;">
+            <div style="background:var(--bg);padding:12px;border-radius:8px;"><div style="font-size:1.4rem;font-weight:800;color:var(--primary);">8</div><div style="color:var(--muted);font-size:0.77rem;">Visites</div></div>
+            <div style="background:var(--bg);padding:12px;border-radius:8px;"><div style="font-size:1.4rem;font-weight:800;color:var(--secondary);">312€</div><div style="color:var(--muted);font-size:0.77rem;">CA estimé</div></div>
+            <div style="background:var(--bg);padding:12px;border-radius:8px;"><div style="font-size:1.4rem;font-weight:800;color:var(--warning);">38 km</div><div style="color:var(--muted);font-size:0.77rem;">Distance</div></div>
+            <div style="background:var(--bg);padding:12px;border-radius:8px;"><div style="font-size:1.4rem;font-weight:800;color:var(--text);">6h30</div><div style="color:var(--muted);font-size:0.77rem;">Durée estimée</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">💊 Matériel à préparer</div>
+          <div style="font-size:0.87rem;">
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span>Seringues insuline</span><span class="tag tag-green">✓ OK</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span>Pansements stériles</span><span class="tag tag-green">✓ OK</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);"><span>Tubulures perfusion</span><span class="tag tag-orange">⚠ Stock faible</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0;"><span>Lecteur carte Vitale</span><span class="tag tag-green">✓ Chargé</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === PATIENTS === -->
+  <div class="page" id="page-patients">
+    <div class="section-header">
+      <h2>👥 Dossiers patients</h2>
+      <button class="btn btn-primary" onclick="openModal('modalPatient')">+ Nouveau patient</button>
+    </div>
+    <div class="search-bar">
+      <input type="text" class="form-control" placeholder="🔍  Rechercher un patient…" oninput="filterPatients(this.value)">
+      <select class="form-control" style="max-width:180px;">
+        <option>Tous les patients</option><option>Actifs</option><option>En pause</option><option>Archivés</option>
+      </select>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table id="patientTable">
+          <thead><tr><th>Patient</th><th>Âge</th><th>Médecin traitant</th><th>Pathologie principale</th><th>Dernière visite</th><th>Statut</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><div style="display:flex;align-items:center;gap:10px;"><div class="patient-avatar" style="background:#3498db;">MM</div><div><div style="font-weight:600;">Mme Martin</div><div style="font-size:0.75rem;color:var(--muted);">Martine Martin</div></div></div></td><td>82 ans</td><td>Dr. Dupuis</td><td>Diabète T2 + plaie chron.</td><td>Aujourd'hui</td><td><span class="tag tag-green">Actif</span></td><td><button class="btn btn-outline btn-sm" onclick="navigate('patients-detail')">Voir</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:10px;"><div class="patient-avatar" style="background:#e74c3c;">JB</div><div><div style="font-weight:600;">M. Bernard</div><div style="font-size:0.75rem;color:var(--muted);">Jean Bernard</div></div></div></td><td>71 ans</td><td>Dr. Moreau</td><td>Diabète insulino-dép.</td><td>Aujourd'hui</td><td><span class="tag tag-green">Actif</span></td><td><button class="btn btn-outline btn-sm">Voir</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:10px;"><div class="patient-avatar" style="background:#9b59b6;">SD</div><div><div style="font-weight:600;">Mme Dupont</div><div style="font-size:0.75rem;color:var(--muted);">Sylvie Dupont</div></div></div></td><td>68 ans</td><td>Dr. Lambert</td><td>AVC séquellaire + BSI</td><td>Aujourd'hui</td><td><span class="tag tag-blue">BSI actif</span></td><td><button class="btn btn-outline btn-sm">Voir</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:10px;"><div class="patient-avatar" style="background:#27ae60;">PL</div><div><div style="font-weight:600;">M. Leroy</div><div style="font-size:0.75rem;color:var(--muted);">Paul Leroy</div></div></div></td><td>55 ans</td><td>Dr. Martin</td><td>Surveillance biologique</td><td>Hier</td><td><span class="tag tag-green">Actif</span></td><td><button class="btn btn-outline btn-sm">Voir</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:10px;"><div class="patient-avatar" style="background:#e67e22;">ML</div><div><div style="font-weight:600;">Mme Leclerc</div><div style="font-size:0.75rem;color:var(--muted);">Marie Leclerc</div></div></div></td><td>77 ans</td><td>Dr. Petit</td><td>Cancer colorectal + stomie</td><td>Hier</td><td><span class="tag tag-orange">Soins lourds</span></td><td><button class="btn btn-outline btn-sm">Voir</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:10px;"><div class="patient-avatar" style="background:#16a085;">GM</div><div><div style="font-weight:600;">M. Moreau</div><div style="font-size:0.75rem;color:var(--muted);">Georges Moreau</div></div></div></td><td>88 ans</td><td>Dr. Dupuis</td><td>HAD — Perfusion domicile</td><td>25/03</td><td><span class="tag tag-red">HAD</span></td><td><button class="btn btn-outline btn-sm">Voir</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- === SOINS === -->
+  <div class="page" id="page-soins">
+    <div class="section-header"><h2>💉 Soins & Actes NGAP</h2><button class="btn btn-primary" onclick="openModal('modalSoin')">+ Nouvel acte</button></div>
+    <div class="grid-3">
+      <div class="card" style="cursor:pointer;transition:box-shadow 0.15s;" onmouseover="this.style.boxShadow='0 4px 20px rgba(26,127,212,0.2)'" onmouseout="this.style.boxShadow=''">
+        <div style="font-size:2rem;margin-bottom:10px;">🩹</div>
+        <div style="font-weight:700;margin-bottom:4px;">Pansements</div>
+        <div style="font-size:0.8rem;color:var(--muted);">Simples, complexes, chirurgicaux</div>
+        <div style="margin-top:10px;"><span class="acte-chip">AMI 1.5</span><span class="acte-chip">AMI 2.0</span><span class="acte-chip">AMI 3.5</span></div>
+      </div>
+      <div class="card" style="cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:10px;">💉</div>
+        <div style="font-weight:700;margin-bottom:4px;">Injections</div>
+        <div style="font-size:0.8rem;color:var(--muted);">SC, IM, IV, insuline</div>
+        <div style="margin-top:10px;"><span class="acte-chip">AMI 1.0</span><span class="acte-chip">AMI 1.25</span></div>
+      </div>
+      <div class="card" style="cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:10px;">🧪</div>
+        <div style="font-weight:700;margin-bottom:4px;">Prélèvements</div>
+        <div style="font-size:0.8rem;color:var(--muted);">Sanguin, urinaire, bactério</div>
+        <div style="margin-top:10px;"><span class="acte-chip">AMI 1.0</span><span class="acte-chip">AMI 2.0</span></div>
+      </div>
+      <div class="card" style="cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:10px;">📋</div>
+        <div style="font-weight:700;margin-bottom:4px;">BSI</div>
+        <div style="font-size:0.8rem;color:var(--muted);">Bilan de soins infirmiers</div>
+        <div style="margin-top:10px;"><span class="acte-chip">AIS 6</span><span class="acte-chip">AIS 9</span><span class="acte-chip">AIS 13</span></div>
+      </div>
+      <div class="card" style="cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:10px;">🚿</div>
+        <div style="font-weight:700;margin-bottom:4px;">Soins d'hygiène</div>
+        <div style="font-size:0.8rem;color:var(--muted);">Toilette, habillage, prévention</div>
+        <div style="margin-top:10px;"><span class="acte-chip">AMI 1.5</span><span class="acte-chip">AMI 2.0</span></div>
+      </div>
+      <div class="card" style="cursor:pointer;">
+        <div style="font-size:2rem;margin-bottom:10px;">💊</div>
+        <div style="font-weight:700;margin-bottom:4px;">Perfusions</div>
+        <div style="font-size:0.8rem;color:var(--muted);">HAD, nutrition parentérale</div>
+        <div style="margin-top:10px;"><span class="acte-chip">AMI 8</span><span class="acte-chip">AMI 12</span><span class="acte-chip">AMI 15</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📜 Actes récents</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Patient</th><th>Acte</th><th>Cotation</th><th>Montant</th><th>Statut</th></tr></thead>
+          <tbody>
+            <tr><td>26/03 07h15</td><td>Mme Martin</td><td>Pansement complexe</td><td>AMI 3.5</td><td>12,85 €</td><td><span class="tag tag-green">Télétransmis</span></td></tr>
+            <tr><td>26/03 07h50</td><td>M. Bernard</td><td>Injection insuline × 2</td><td>AMI 1.0 × 2</td><td>7,34 €</td><td><span class="tag tag-green">Télétransmis</span></td></tr>
+            <tr><td>25/03 10h00</td><td>Mme Leclerc</td><td>Soin stomie</td><td>AMI 5.0</td><td>18,35 €</td><td><span class="tag tag-green">Télétransmis</span></td></tr>
+            <tr><td>25/03 09h00</td><td>M. Moreau</td><td>Perfusion domicile</td><td>AMI 12.0</td><td>44,04 €</td><td><span class="tag tag-orange">En attente NOEMIE</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- === TRANSMISSIONS === -->
+  <div class="page" id="page-transmissions">
+    <div class="section-header"><h2>📋 Transmissions ciblées</h2><button class="btn btn-primary" onclick="openModal('modalTransmission')">+ Nouvelle transmission</button></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🔴 Urgentes (1)</div>
+        <div style="border:2px solid var(--danger);border-radius:10px;padding:14px;background:#fdecea;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-weight:700;">M. Bernard — Glycémie</span><span class="tag tag-red">Urgent</span></div>
+          <div style="font-size:0.85rem;margin-bottom:8px;">Glycémie à 3,1 g/L ce matin. Patient confus. A contacté le Dr. Moreau. Adapter la dose d'insuline selon prescription.</div>
+          <div style="font-size:0.75rem;color:var(--muted);">Mme Laurent (IDE) • 26/03 08h00 • Remplaçante informée ✓</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🟡 À suivre (2)</div>
+        <div style="border:1px solid var(--warning);border-radius:10px;padding:12px;margin-bottom:8px;background:#fef9e7;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-weight:700;">Mme Martin — Plaie</span><span class="tag tag-orange">Surveillance</span></div>
+          <div style="font-size:0.83rem;margin-bottom:6px;">Plaie J7 post-op. Cicatrisation en cours, légèrement suintante. Pansement changé, douleur EVA 3/10.</div>
+          <div style="font-size:0.75rem;color:var(--muted);">Mme Laurent • 25/03 19h00</div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:#f8fafc;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-weight:700;">M. Moreau — HAD</span><span class="tag tag-gray">Info</span></div>
+          <div style="font-size:0.83rem;margin-bottom:6px;">Bien toléré la perfusion d'hier soir. Pas de signes d'allergie. TA stable 130/80.</div>
+          <div style="font-size:0.75rem;color:var(--muted);">Mme Laurent • 25/03 21h30</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📜 Historique des transmissions</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Patient</th><th>Catégorie</th><th>Contenu</th><th>Auteur</th><th>Lu</th></tr></thead>
+          <tbody>
+            <tr><td>26/03 08h00</td><td>M. Bernard</td><td><span class="tag tag-red">Urgente</span></td><td>Glycémie élevée — Dr. informé</td><td>Mme Laurent</td><td><span class="tag tag-orange">Non lu</span></td></tr>
+            <tr><td>25/03 19h00</td><td>Mme Martin</td><td><span class="tag tag-orange">Surveillance</span></td><td>Plaie J7 — cicatrisation en cours</td><td>Mme Laurent</td><td><span class="tag tag-green">Lu</span></td></tr>
+            <tr><td>25/03 21h30</td><td>M. Moreau</td><td><span class="tag tag-gray">Info</span></td><td>Perfusion bien tolérée</td><td>Mme Laurent</td><td><span class="tag tag-green">Lu</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- === FACTURATION === -->
+  <div class="page" id="page-facturation">
+    <div class="section-header"><h2>💶 Facturation & Télétransmission</h2><button class="btn btn-success" onclick="openModal('modalFacture')">Télétransmettre SESAM</button></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon green">💶</div><div class="stat-info"><div class="val">5 840€</div><div class="lbl">CA mars 2026</div></div></div>
+      <div class="stat-card"><div class="stat-icon blue">✅</div><div class="stat-info"><div class="val">5 220€</div><div class="lbl">Reçu CPAM</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange">⏳</div><div class="stat-info"><div class="val">420€</div><div class="lbl">En attente NOEMIE</div></div></div>
+      <div class="stat-card"><div class="stat-icon red">❌</div><div class="stat-info"><div class="val">200€</div><div class="lbl">Rejets à traiter</div></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">📑 Feuilles de soins récentes</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>N°</th><th>Patient</th><th>Date</th><th>Montant</th><th>Statut</th></tr></thead>
+            <tbody>
+              <tr><td>#2026-089</td><td>Mme Martin</td><td>26/03</td><td>12,85€</td><td><span class="tag tag-green">Accepté</span></td></tr>
+              <tr><td>#2026-088</td><td>M. Bernard</td><td>26/03</td><td>14,68€</td><td><span class="tag tag-green">Accepté</span></td></tr>
+              <tr><td>#2026-087</td><td>M. Moreau</td><td>25/03</td><td>44,04€</td><td><span class="tag tag-orange">En attente</span></td></tr>
+              <tr><td>#2026-086</td><td>Mme Petit</td><td>24/03</td><td>7,34€</td><td><span class="tag tag-red">Rejeté</span></td></tr>
+              <tr><td>#2026-085</td><td>Mme Leclerc</td><td>24/03</td><td>18,35€</td><td><span class="tag tag-green">Accepté</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Répartition des actes (mars)</div>
+        <div style="font-size:0.87rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+            <span>Injections / Insuline</span>
+            <div style="display:flex;align-items:center;gap:10px;"><div class="progress-bar" style="width:100px;"><div class="progress-fill" style="width:45%;background:var(--secondary);"></div></div><span style="font-weight:700;color:var(--secondary);">45%</span></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+            <span>Pansements</span>
+            <div style="display:flex;align-items:center;gap:10px;"><div class="progress-bar" style="width:100px;"><div class="progress-fill" style="width:28%;background:var(--primary);"></div></div><span style="font-weight:700;color:var(--primary);">28%</span></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+            <span>BSI / Soins lourds</span>
+            <div style="display:flex;align-items:center;gap:10px;"><div class="progress-bar" style="width:100px;"><div class="progress-fill" style="width:18%;background:var(--warning);"></div></div><span style="font-weight:700;color:var(--warning);">18%</span></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+            <span>Autres actes</span>
+            <div style="display:flex;align-items:center;gap:10px;"><div class="progress-bar" style="width:100px;"><div class="progress-fill" style="width:9%;background:var(--muted);"></div></div><span style="font-weight:700;color:var(--muted);">9%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === STATISTIQUES === -->
+  <div class="page" id="page-statistiques">
+    <div class="section-header"><h2>📈 Statistiques & Analyses</h2></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon blue">📅</div><div class="stat-info"><div class="val">247</div><div class="lbl">Actes ce mois</div><div class="trend trend-up">▲ +8% vs fév.</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">💶</div><div class="stat-info"><div class="val">5 840€</div><div class="lbl">CA mars</div><div class="trend trend-up">▲ +5%</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange">🕐</div><div class="stat-info"><div class="val">6h24</div><div class="lbl">Durée moy. tournée</div><div class="trend">Stable</div></div></div>
+      <div class="stat-card"><div class="stat-icon red">📍</div><div class="stat-info"><div class="val">41 km</div><div class="lbl">Distance moy./jour</div><div class="trend trend-down">▼ -3 km</div></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">📅 Actes par mois (2026)</div>
+        <div style="display:flex;align-items:flex-end;gap:10px;height:140px;padding-top:10px;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;"><div style="background:var(--primary);width:100%;border-radius:4px 4px 0 0;" style="height:90px;background:var(--primary);"></div><div class="progress-fill" style="width:100%;height:90px;background:var(--primary);border-radius:4px 4px 0 0;"></div><span style="font-size:0.72rem;color:var(--muted);">Jan</span><span style="font-size:0.78rem;font-weight:700;">228</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;"><div style="width:100%;height:110px;background:var(--primary);border-radius:4px 4px 0 0;opacity:0.85;"></div><span style="font-size:0.72rem;color:var(--muted);">Fév</span><span style="font-size:0.78rem;font-weight:700;">235</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;"><div style="width:100%;height:130px;background:var(--primary);border-radius:4px 4px 0 0;border:2px solid var(--primary-dark);"></div><span style="font-size:0.72rem;color:var(--muted);">Mar</span><span style="font-size:0.78rem;font-weight:700;color:var(--primary);">247</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏆 Top actes</div>
+        <div style="font-size:0.87rem;">
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);"><span>🥇 Injections SC (insuline)</span><span style="font-weight:700;">112 actes</span></div>
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);"><span>🥈 Pansements complexes</span><span style="font-weight:700;">68 actes</span></div>
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);"><span>🥉 Prises de sang</span><span style="font-weight:700;">31 actes</span></div>
+          <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);"><span>4. Soins stomie</span><span style="font-weight:700;">21 actes</span></div>
+          <div style="display:flex;justify-content:space-between;padding:9px 0;"><span>5. BSI évaluation</span><span style="font-weight:700;">15 actes</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === MESSAGERIE === -->
+  <div class="page" id="page-messagerie">
+    <div class="section-header"><h2>✉️ Messagerie Sécurisée (MSS)</h2><button class="btn btn-primary" onclick="openModal('modalMessage')">+ Nouveau message</button></div>
+    <div class="alert alert-info">🔒 Messagerie chiffrée et conforme HDS — Échanges sécurisés avec médecins, pharmaciens, hôpitaux.</div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>De / À</th><th>Objet</th><th>Date</th><th>Pièce jointe</th></tr></thead>
+          <tbody>
+            <tr style="font-weight:600;background:#f0f7ff;"><td>🔵</td><td>Dr. Moreau (généraliste)</td><td>RE: M. Bernard — Adaptation insuline</td><td>Aujourd'hui 09h12</td><td>—</td></tr>
+            <tr style="font-weight:600;"><td>🔵</td><td>HAD Centre Hospitalier</td><td>Dossier M. Moreau — Protocole perfusion</td><td>Hier 16h30</td><td>📎 Protocole.pdf</td></tr>
+            <tr><td></td><td>Dr. Lambert</td><td>RE: BSI Mme Dupont — Accord prolongation</td><td>24/03</td><td>—</td></tr>
+            <tr><td></td><td>Pharmacie du Centre</td><td>Rupture tubulures — Livraison demain</td><td>24/03</td><td>—</td></tr>
+            <tr><td></td><td>Dr. Petit</td><td>Ordonnance Mme Leclerc — Renouvellement</td><td>23/03</td><td>📎 Ordonnance.pdf</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modalRdv">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">📅 Nouveau rendez-vous</div><button class="modal-close" onclick="closeModal('modalRdv')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Patient</label><select class="form-control"><option>Mme Martin</option><option>M. Bernard</option><option>Mme Dupont</option><option>Nouveau patient…</option></select></div>
+      <div class="form-group"><label>Date</label><input type="date" class="form-control" value="2026-03-26"></div>
+      <div class="form-group"><label>Heure</label><input type="time" class="form-control" value="08:30"></div>
+      <div class="form-group"><label>Type de soin</label><select class="form-control"><option>Pansement</option><option>Injection insuline</option><option>Prise de sang</option><option>BSI</option><option>Perfusion</option><option>Autres</option></select></div>
+    </div>
+    <div class="form-group"><label>Notes</label><textarea class="form-control" placeholder="Informations complémentaires…"></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+      <button class="btn btn-outline" onclick="closeModal('modalRdv')">Annuler</button>
+      <button class="btn btn-primary" onclick="closeModal('modalRdv')">✓ Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalPatient">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">👤 Nouveau dossier patient</div><button class="modal-close" onclick="closeModal('modalPatient')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nom</label><input class="form-control" placeholder="Dupont"></div>
+      <div class="form-group"><label>Prénom</label><input class="form-control" placeholder="Marie"></div>
+      <div class="form-group"><label>Date de naissance</label><input type="date" class="form-control"></div>
+      <div class="form-group"><label>N° Sécurité Sociale</label><input class="form-control" placeholder="1 XX XX XX XXX XXX XX"></div>
+      <div class="form-group"><label>Téléphone</label><input class="form-control" placeholder="06 XX XX XX XX"></div>
+      <div class="form-group"><label>Médecin traitant</label><input class="form-control" placeholder="Dr. Dupuis"></div>
+    </div>
+    <div class="form-group"><label>Adresse</label><input class="form-control" placeholder="14 rue des Lilas, 02100 Saint-Quentin"></div>
+    <div class="form-group"><label>Pathologie / Motif de soins</label><textarea class="form-control" placeholder="Diabète de type 2, plaie chronique…"></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+      <button class="btn btn-outline" onclick="closeModal('modalPatient')">Annuler</button>
+      <button class="btn btn-primary" onclick="closeModal('modalPatient')">✓ Créer le dossier</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalTransmission">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">📋 Nouvelle transmission ciblée</div><button class="modal-close" onclick="closeModal('modalTransmission')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Patient</label><select class="form-control"><option>M. Bernard</option><option>Mme Martin</option><option>M. Moreau</option></select></div>
+      <div class="form-group"><label>Priorité</label><select class="form-control"><option>🟢 Info</option><option>🟡 À surveiller</option><option>🔴 Urgent</option></select></div>
+    </div>
+    <div class="form-group"><label>Transmission</label><textarea class="form-control" style="min-height:120px;" placeholder="Données : observation clinique…&#10;Action : soin réalisé…&#10;Résultat : évolution…"></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+      <button class="btn btn-outline" onclick="closeModal('modalTransmission')">Annuler</button>
+      <button class="btn btn-primary" onclick="closeModal('modalTransmission')">✓ Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalSoin">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">💉 Saisir un acte</div><button class="modal-close" onclick="closeModal('modalSoin')">✕</button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Patient</label><select class="form-control"><option>Mme Martin</option><option>M. Bernard</option><option>Mme Dupont</option></select></div>
+      <div class="form-group"><label>Date & Heure</label><input type="datetime-local" class="form-control"></div>
+      <div class="form-group"><label>Type d'acte</label><select class="form-control"><option>Pansement simple (AMI 1.5)</option><option>Pansement complexe (AMI 3.5)</option><option>Injection SC (AMI 1.0)</option><option>Prise de sang (AMI 1.0)</option><option>BSI (AIS 9)</option><option>Perfusion (AMI 12.0)</option></select></div>
+      <div class="form-group"><label>Cotation NGAP</label><input class="form-control" placeholder="ex: AMI 3.5" value="AMI 3.5"></div>
+    </div>
+    <div class="form-group"><label>Observations</label><textarea class="form-control" placeholder="Notes cliniques…"></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+      <button class="btn btn-outline" onclick="closeModal('modalSoin')">Annuler</button>
+      <button class="btn btn-success" onclick="closeModal('modalSoin')">✓ Valider l'acte</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalFacture">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">📡 Télétransmission SESAM-Vitale</div><button class="modal-close" onclick="closeModal('modalFacture')">✕</button></div>
+    <div class="alert alert-success">✅ Lecteur carte Vitale connecté — 4 feuilles de soins en attente</div>
+    <div style="font-size:0.88rem;">
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span>Mme Martin — #2026-089</span><span style="font-weight:700;">12,85€</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span>M. Bernard — #2026-088</span><span style="font-weight:700;">14,68€</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><span>M. Moreau — #2026-087</span><span style="font-weight:700;">44,04€</span></div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;font-size:1rem;color:var(--primary);"><span>Total à transmettre</span><span>71,57€</span></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-outline" onclick="closeModal('modalFacture')">Annuler</button>
+      <button class="btn btn-success" onclick="closeModal('modalFacture')">📡 Transmettre à la CPAM</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalMessage">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">✉️ Nouveau message sécurisé</div><button class="modal-close" onclick="closeModal('modalMessage')">✕</button></div>
+    <div class="form-group"><label>Destinataire (MSS)</label><input class="form-control" placeholder="dr.moreau@medecin.mssante.fr"></div>
+    <div class="form-group"><label>Objet</label><input class="form-control" placeholder="RE: Patient — Sujet"></div>
+    <div class="form-group"><label>Message</label><textarea class="form-control" style="min-height:130px;" placeholder="Votre message…"></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+      <button class="btn btn-outline" onclick="closeModal('modalMessage')">Annuler</button>
+      <button class="btn btn-primary" onclick="closeModal('modalMessage')">📤 Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const titles = {
+  dashboard: 'Tableau de bord', planning: 'Planning', tournee: 'Tournée du jour',
+  patients: 'Dossiers patients', soins: 'Soins & Actes NGAP', transmissions: 'Transmissions',
+  facturation: 'Facturation', statistiques: 'Statistiques', messagerie: 'Messagerie MSS'
+};
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + page + "'")) n.classList.add('active');
+  });
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('open'); });
+});
+
+function filterPatients(val) {
+  const rows = document.querySelectorAll('#patientTable tbody tr');
+  rows.forEach(r => { r.style.display = r.textContent.toLowerCase().includes(val.toLowerCase()) ? '' : 'none'; });
+}
+</script>
+</body>
+</html>
